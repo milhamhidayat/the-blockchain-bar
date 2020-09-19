@@ -2,12 +2,17 @@ package database
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
+
+// Snapshot is a transaction db contents which has been hash-ed
+type Snapshot [32]byte
 
 // State represent business logic for db component
 // Know all user balances
@@ -17,6 +22,7 @@ type State struct {
 	Balances  map[Account]uint
 	txMempool []Tx
 	dbFile    *os.File
+	snapshot  Snapshot
 }
 
 // NewStateFromDisk update transaction data
@@ -48,6 +54,7 @@ func NewStateFromDisk() (*State, error) {
 		balances,
 		make([]Tx, 0),
 		f,
+		Snapshot{},
 	}
 
 	// Iterate over each the tx.db file's line by line
@@ -71,7 +78,18 @@ func NewStateFromDisk() (*State, error) {
 			return nil, err
 		}
 	}
+
+	err = state.doSnapShot()
+	if err != nil {
+		return nil, err
+	}
+
 	return state, nil
+}
+
+// LatestSnapshot return latest hashed state snapshot
+func (s *State) LatestSnapshot() Snapshot {
+	return s.snapshot
 }
 
 // Add will add new transactions to mempool
@@ -90,45 +108,41 @@ func (s *State) Add(tx Tx) error {
 }
 
 // Persist will write transactions to disk
-func (s *State) Persist() error {
+func (s *State) Persist() (Snapshot, error) {
 	// Make a copy of mempool because the s.txMempool will be modified
 	// in the loop below
 	mempool := make([]Tx, len(s.txMempool))
 	copy(mempool, s.txMempool)
 
-	fmt.Println("======== mempool ========")
-	fmt.Printf("%+v\n", mempool)
-	fmt.Println("=================")
-
 	for i := 0; i < len(mempool); i++ {
 		txJSON, err := json.Marshal(s.txMempool[i])
 		if err != nil {
-			return err
+			return Snapshot{}, err
 		}
 
+		fmt.Println("Persisting new TX to disk:")
+		fmt.Printf("\t%s\n", txJSON)
 		_, err = s.dbFile.Write(append(txJSON, '\n'))
 		if err != nil {
-			return err
+			return Snapshot{}, err
 		}
+
+		err = s.doSnapShot()
+		if err != nil {
+			return Snapshot{}, err
+		}
+		fmt.Printf("New DB Snapshot: %x\n", s.snapshot)
 
 		// remove the tx written to a file from the mempool
 		s.txMempool = append(s.txMempool[:i], s.txMempool[i+1:]...)
-
-		fmt.Println("++++++++ mempool loop++++++++")
-		fmt.Printf("%+v\n", s.txMempool)
-		fmt.Println("+++++++++++++++++")
 	}
 
-	fmt.Println("++++++++ mempool final++++++++")
-	fmt.Printf("%+v\n", s.txMempool)
-	fmt.Println("+++++++++++++++++")
-
-	return nil
+	return s.snapshot, nil
 }
 
 // Close will close tx db file
-func (s *State) Close() {
-	s.dbFile.Close()
+func (s *State) Close() error {
+	return s.dbFile.Close()
 }
 
 // apply will change and validate the state
@@ -138,12 +152,28 @@ func (s *State) apply(tx Tx) error {
 		return nil
 	}
 
-	if s.Balances[tx.From] < tx.Value {
+	if s.Balances[tx.From]-tx.Value < 0 {
 		return errors.New("insufficient balances")
 	}
 
 	s.Balances[tx.From] -= tx.Value
 	s.Balances[tx.To] += tx.Value
 
+	return nil
+}
+
+// doSnapShot will take hash snapshot from tx.db
+func (s *State) doSnapShot() error {
+	_, err := s.dbFile.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+
+	txsData, err := ioutil.ReadAll(s.dbFile)
+	if err != nil {
+		return err
+	}
+
+	s.snapshot = sha256.Sum256(txsData)
 	return nil
 }

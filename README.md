@@ -26,3 +26,7 @@ Project from Lukas book Build Blockchain From Scratch In Go
 ### 5 - Why We Need Blockchain
 
 - Blockchain developers aim to develop protocols where applications’ entrepreneurs and users synergize in a transparent, auditable relationship. Specifications of the blockchain system should be well-defined from the beginning and only change if its users support it.
+
+### 6 - L'Hash de Immutable
+
+- The database content is hashed by a secure cryptographic hash function. The blockchain participants use the resulted hash to reference a specific database state.
