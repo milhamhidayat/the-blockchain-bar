@@ -18,7 +18,7 @@ type Tx struct {
 
 // NewTx return new transaction
 func NewTx(from Account, to Account, value uint, data string) Tx {
-	return NewTx(from, to, value, data)
+	return Tx{from, to, value, data}
 }
 
 // IsReward check if transaction is eligible for a reward

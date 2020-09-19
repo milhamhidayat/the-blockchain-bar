@@ -3,6 +3,7 @@ package database
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -95,6 +96,10 @@ func (s *State) Persist() error {
 	mempool := make([]Tx, len(s.txMempool))
 	copy(mempool, s.txMempool)
 
+	fmt.Println("======== mempool ========")
+	fmt.Printf("%+v\n", mempool)
+	fmt.Println("=================")
+
 	for i := 0; i < len(mempool); i++ {
 		txJSON, err := json.Marshal(s.txMempool[i])
 		if err != nil {
@@ -108,7 +113,15 @@ func (s *State) Persist() error {
 
 		// remove the tx written to a file from the mempool
 		s.txMempool = append(s.txMempool[:i], s.txMempool[i+1:]...)
+
+		fmt.Println("++++++++ mempool loop++++++++")
+		fmt.Printf("%+v\n", s.txMempool)
+		fmt.Println("+++++++++++++++++")
 	}
+
+	fmt.Println("++++++++ mempool final++++++++")
+	fmt.Printf("%+v\n", s.txMempool)
+	fmt.Println("+++++++++++++++++")
 
 	return nil
 }
@@ -126,7 +139,7 @@ func (s *State) apply(tx Tx) error {
 	}
 
 	if s.Balances[tx.From] < tx.Value {
-		return fmt.Errorf("insufficient balance")
+		return errors.New("insufficient balances")
 	}
 
 	s.Balances[tx.From] -= tx.Value
