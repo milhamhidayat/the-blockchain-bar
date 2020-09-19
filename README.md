@@ -18,3 +18,11 @@ Project from Lukas book Build Blockchain From Scratch In Go
 ### 3 - Monolith Event vs Transaction
 
 - Transactions are old fashion Events representing actions within the system
+
+### 4 - Humans Are Greedy
+
+- Closed software with centralized access to private data and rules puts only a few people to the position of power. Users don’t have a choice, and shareholders are in business to make money.
+
+### 5 - Why We Need Blockchain
+
+- Blockchain developers aim to develop protocols where applications’ entrepreneurs and users synergize in a transparent, auditable relationship. Specifications of the blockchain system should be well-defined from the beginning and only change if its users support it.
