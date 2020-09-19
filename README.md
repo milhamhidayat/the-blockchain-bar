@@ -13,4 +13,8 @@ Project from Lukas book Build Blockchain From Scratch In Go
 ### 2 - Mutating Global DB State
 
 - **Genesis** file indicate what was the original blockchain state and never updated afterwards.
-- The database staet changes are called **Transactions** (TX).
+- The database state changes are called **Transactions** (TX).
+
+### 3 - Monolith Event vs Transaction
+
+- Transactions are old fashion Events representing actions within the system
