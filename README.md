@@ -33,8 +33,12 @@ Project from Lukas book Build Blockchain From Scratch In Go
 
 ### 7 - The BlockChain Programming Model
 
+![blockchain](./public/img/blockchain.png)
+
+- The ParentHash is being used as a reliable “checkpoint,” representing and referencing the previously hashed database content.
+
 - Transactions are grouped into batches for performance reasons. A batch of transactions make a Block. Each block is encoded and hashed using a secure, cryptographic hash function.
 
 - Block contains Header and Payload. The Header stores various metadata such a time and a reference to the Parent Block (the previous immutable database state). The Payload carries the new database transactions.
 
-![blockchain](./public/img/blockchain.png)
+- ParentHash improves performance. Only new data + reference to previous state needs to be hashed to achieve immutability.
