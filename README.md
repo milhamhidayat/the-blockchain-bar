@@ -42,3 +42,13 @@ Project from Lukas book Build Blockchain From Scratch In Go
 - Block contains Header and Payload. The Header stores various metadata such a time and a reference to the Parent Block (the previous immutable database state). The Payload carries the new database transactions.
 
 - ParentHash improves performance. Only new data + reference to previous state needs to be hashed to achieve immutability.
+
+### 8 - Transparent Database
+
+#### Flexible DB Directory
+
+Setup:
+
+- Create `tbb/database` folder in `$HOME` folder
+- Copy `block.db` file from `./database/block.db` to `$HOME/tbb/database`
+- Run: `./tbb balances list --datadir=/Users/quasar/tbb .tbb`
