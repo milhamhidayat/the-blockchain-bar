@@ -22,8 +22,8 @@ type BlockFS struct {
 
 // Block contains batches of transactions and hashed
 type Block struct {
-	Header BlockHeader
-	TXs    []Tx // new transactions only (payload)
+	Header BlockHeader `json:"header"`
+	TXs    []Tx        `json:"payload"` // new transactions only (payload)
 }
 
 // NewBlock will return new block

@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"the-blockchain-bar/database"
 	"time"
+
+	"the-blockchain-bar/database"
 )
 
 func main() {

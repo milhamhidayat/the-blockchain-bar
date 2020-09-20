@@ -30,3 +30,11 @@ Project from Lukas book Build Blockchain From Scratch In Go
 ### 6 - L'Hash de Immutable
 
 - The database content is hashed by a secure cryptographic hash function. The blockchain participants use the resulted hash to reference a specific database state.
+
+### 7 - The BlockChain Programming Model
+
+- Transactions are grouped into batches for performance reasons. A batch of transactions make a Block. Each block is encoded and hashed using a secure, cryptographic hash function.
+
+- Block contains Header and Payload. The Header stores various metadata such a time and a reference to the Parent Block (the previous immutable database state). The Payload carries the new database transactions.
+
+![blockchain](./public/img/blockchain.png)
