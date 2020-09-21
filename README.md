@@ -51,4 +51,34 @@ Setup:
 
 - Create `tbb/database` folder in `$HOME` folder
 - Copy `block.db` file from `./database/block.db` to `$HOME/tbb/database`
-- Run: `./tbb balances list --datadir=/Users/quasar/tbb .tbb`
+- Run: `./tbb balances list --datadir=$HOME/tbb .tbb`
+
+### 9 - It Takes Two Nodes To Tango
+
+#### Designing a Peer to Peer Sync Algorithm
+
+1. As Andrej
+
+- Can share his database with everyone
+- His database won't become the only source of truth
+- There are copies of bar database in the world
+- The bar will work if the node is turned off
+
+2. As Babayaga
+
+- Can automatically get copy of updated Andrej's database
+- Verify how much TBB token she has
+- Can test program business logic and ensure there are no hidden fees when transfer token to someone
+- To be "the master" database
+- Update database even if Andrej's node is offline
+
+3. Julius Caesar
+
+- Able bidirectionlly synchronize his database with anyone currently online
+- Always have up to date overview of bar situation and activity
+
+![Node design](./public/img/node_design.png)
+
+#### Why is the boostrap node necessary?
+
+- The bootstrap node is used to initiate the peer discovery, and blockchain synchronization. By connecting to bootstrap node, user node able to discover others node and sync the db.
