@@ -12,7 +12,7 @@ const (
 	// Minor is app minor versioning
 	Minor = "6"
 	// Fix is app fix versioning
-	Fix = "0"
+	Fix = "1"
 	// Verbal is app information
 	Verbal = "HTTP API"
 )
