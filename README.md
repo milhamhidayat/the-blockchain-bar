@@ -82,3 +82,17 @@ Setup:
 #### Why is the boostrap node necessary?
 
 - The bootstrap node is used to initiate the peer discovery, and blockchain synchronization. By connecting to bootstrap node, user node able to discover others node and sync the db.
+
+### 10 - Programming a Peer to Peer DB Sync Algorithm
+
+#### Each Block Has a Number
+
+- A `node` must **know** how many blocks it has.
+- Every block header needs a **number** representing the sequence in which the block was added into the blockchain.
+- The term is: `block height`. Height (size) of the database ledger.
+- Blockchain and immutability has many drawback. Add new column in blockchain, rewrite the entire database from scratch
+
+#### Tell Me Your State
+
+- Node needs to expose its current `state` so it can synchronize with the rest of the blockchain network.
+- So someone know who has new database content to synchronize from
