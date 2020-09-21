@@ -4,12 +4,12 @@ build:
 
 .PHONY: migrate
 migrate:
-	./tbb migrate --datadir=$${HOME}/tbb/ .tbb
+	./tbb migrate --datadir=$${HOME}/.tbb
 
 .PHONY: reset-db
 reset-db:
-	cat /dev/null > $${HOME}/tbb/database/block.db
+	cat /dev/null > $${HOME}/.tbb/database/block.db
 
 .PHONY: api
 api:
-	./tbb run --datadir=$${HOME}/tbb/ .tbb
+	./tbb run --datadir=$${HOME}/.tbb
