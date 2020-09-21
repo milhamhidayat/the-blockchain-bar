@@ -24,8 +24,9 @@ func (h *Hash) UnmarshalText(data []byte) error {
 
 // BlockHeader is block metadata
 type BlockHeader struct {
-	Parent Hash // parent block reference
-	Time   uint64
+	Parent Hash   `json:"parent"` // parent block reference
+	Number uint64 `json:"number"`
+	Time   uint64 `json:"time"`
 }
 
 // BlockFS store unique hash from a block
@@ -41,10 +42,11 @@ type Block struct {
 }
 
 // NewBlock will return new block
-func NewBlock(parent Hash, time uint64, txs []Tx) Block {
+func NewBlock(parent Hash, number uint64, time uint64, txs []Tx) Block {
 	return Block{
 		Header: BlockHeader{
 			Parent: parent,
+			Number: number,
 			Time:   time,
 		},
 		TXs: txs,

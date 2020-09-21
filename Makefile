@@ -1,10 +1,14 @@
-.PHONY: build-tbb
-build-tbb:
+.PHONY: build
+build:
 	go build ./cmd/tbb/...
 
-.PHONY: build-tbb-migrate
-build-tbb-migrate:
-	go build ./cmd/tbbmigrate/...
+.PHONY: migrate
+migrate:
+	./tbb migrate --datadir=$${HOME}/tbb/ .tbb
+
+.PHONY: reset-db
+reset-db:
+	cat /dev/null > $${HOME}/tbb/database/block.db
 
 .PHONY: api
 api:

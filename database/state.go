@@ -17,11 +17,14 @@ type State struct {
 	Balances        map[Account]uint
 	txMempool       []Tx
 	dbFile          *os.File
+	latestBlock     Block
 	latestBlockHash Hash
 }
 
 // NewStateFromDisk update transaction data
 func NewStateFromDisk(dataDir string) (*State, error) {
+	dataDir = ExpandPath(dataDir)
+
 	err := initDataDirIfNotExists(dataDir)
 	if err != nil {
 		return nil, err
@@ -47,6 +50,7 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 		balances,
 		make([]Tx, 0),
 		f,
+		Block{},
 		Hash{},
 	}
 
@@ -59,6 +63,11 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 
 		var blockFs BlockFS
 		blockFsJSON := scanner.Bytes()
+
+		if len(blockFsJSON) == 0 {
+			break
+		}
+
 		err = json.Unmarshal(blockFsJSON, &blockFs)
 		if err != nil {
 			return nil, err
@@ -69,9 +78,15 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 			return nil, err
 		}
 
+		state.latestBlock = blockFs.Value
 		state.latestBlockHash = blockFs.Key
 	}
 	return state, nil
+}
+
+// LatestBlock return latest block
+func (s *State) LatestBlock() Block {
+	return s.latestBlock
 }
 
 // LatestBlockHash return latest block hash
@@ -107,7 +122,16 @@ func (s *State) AddTx(tx Tx) error {
 
 // Persist will write transactions to disk
 func (s *State) Persist() (Hash, error) {
-	block := NewBlock(s.latestBlockHash, uint64(time.Now().Unix()), s.txMempool)
+	latestBlockHash, err := s.latestBlock.Hash()
+	if err != nil {
+		return Hash{}, err
+	}
+
+	block := NewBlock(
+		latestBlockHash,
+		s.latestBlock.Header.Number+1,
+		uint64(time.Now().Unix()),
+		s.txMempool)
 	blockHash, err := block.Hash()
 	if err != nil {
 		return Hash{}, err
@@ -126,10 +150,11 @@ func (s *State) Persist() (Hash, error) {
 	if err != nil {
 		return Hash{}, err
 	}
-	s.latestBlockHash = blockHash
+	s.latestBlockHash = latestBlockHash
+	s.latestBlock = block
 	s.txMempool = []Tx{}
 
-	return s.latestBlockHash, nil
+	return latestBlockHash, nil
 }
 
 // Close will close tx db file
