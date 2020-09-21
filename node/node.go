@@ -21,6 +21,12 @@ type BalanceRes struct {
 	Balances map[database.Account]uint `json:"balances"`
 }
 
+// StatusRes is a response for node status
+type StatusRes struct {
+	Hash   database.Hash `json:"block_hash"`
+	Number uint64        `json:"block_number"`
+}
+
 // TxAddReq is a request to add a new transaction
 type TxAddReq struct {
 	From  string `json:"from"`
@@ -46,6 +52,14 @@ func Run(dataDir string) error {
 
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		listBalancesHandler(w, r, state)
+	})
+
+	http.HandleFunc("/tx/add", func(w http.ResponseWriter, r *http.Request) {
+		txAddHandler(w, r, state)
+	})
+
+	http.HandleFunc("/node/status", func(w http.ResponseWriter, r *http.Request) {
+		statusHandler(w, r, state)
 	})
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
@@ -85,6 +99,15 @@ func txAddHandler(w http.ResponseWriter, r *http.Request, state *database.State)
 	}
 
 	writeRes(w, TxAddRes{hash})
+}
+
+func statusHandler(w http.ResponseWriter, r *http.Request, state *database.State) {
+	res := StatusRes{
+		Hash:   state.LatestBlockHash(),
+		Number: state.LatestBlock().Header.Number,
+	}
+
+	writeRes(w, res)
 }
 
 func writeRes(w http.ResponseWriter, content interface{}) {

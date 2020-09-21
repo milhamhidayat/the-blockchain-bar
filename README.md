@@ -95,4 +95,4 @@ Setup:
 #### Tell Me Your State
 
 - Node needs to expose its current `state` so it can synchronize with the rest of the blockchain network.
-- So someone know who has new database content to synchronize from
+- So someone know who has new database content to synchronize from.
