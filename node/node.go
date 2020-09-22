@@ -1,14 +1,30 @@
 package node
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"the-blockchain-bar/database"
 )
 
-const httpPort = 8080
+// DefaultHTTPPort is default http port for api
+const DefaultHTTPPort = 8080
+
+// PeerNode is node owned by other user
+// connected to blockchain that can be peered
+type PeerNode struct {
+	IP          string `json:"ip"`
+	Port        uint64 `json:"port"`
+	IsBootstrap bool   `json:"is_bootstrap"`
+	IsActive    bool   `json:"is_active"`
+}
+
+// Node is consist of host ledger and smart contract
+type Node struct {
+	dataDir    string
+	port       uint64
+	state      *database.State
+	knownPeers []PeerNode
+}
 
 // ErrRes is a response for an error
 type ErrRes struct {
@@ -23,8 +39,9 @@ type BalanceRes struct {
 
 // StatusRes is a response for node status
 type StatusRes struct {
-	Hash   database.Hash `json:"block_hash"`
-	Number uint64        `json:"block_number"`
+	Hash       database.Hash `json:"block_hash"`
+	Number     uint64        `json:"block_number"`
+	KnownPeers []PeerNode    `json:"peers_known"`
 }
 
 // TxAddReq is a request to add a new transaction
@@ -40,15 +57,36 @@ type TxAddRes struct {
 	Hash database.Hash `json:"block_hash"`
 }
 
-// Run will run rest API
-func Run(dataDir string) error {
-	fmt.Println(fmt.Sprintf("Listening on HTTP port: %d", httpPort))
+// New will return new node
+func New(dataDir string, port uint64, bootstrap PeerNode) *Node {
+	return &Node{
+		dataDir:    dataDir,
+		port:       port,
+		knownPeers: []PeerNode{bootstrap},
+	}
+}
 
-	state, err := database.NewStateFromDisk(dataDir)
+// NewPeerNode will return new peer node
+func NewPeerNode(ip string, port uint64, isBootstrap bool, isActive bool) PeerNode {
+	return PeerNode{
+		IP:          ip,
+		Port:        port,
+		IsBootstrap: isBootstrap,
+		IsActive:    isActive,
+	}
+}
+
+// Run will run rest API
+func (n *Node) Run() error {
+	fmt.Println(fmt.Sprintf("Listening on HTTP port: %d", n.port))
+
+	state, err := database.NewStateFromDisk(n.dataDir)
 	if err != nil {
 		return err
 	}
 	defer state.Close()
+
+	n.state = state
 
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		listBalancesHandler(w, r, state)
@@ -59,10 +97,10 @@ func Run(dataDir string) error {
 	})
 
 	http.HandleFunc("/node/status", func(w http.ResponseWriter, r *http.Request) {
-		statusHandler(w, r, state)
+		statusHandler(w, r, n)
 	})
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
+	return http.ListenAndServe(fmt.Sprintf(":%d", n.port), nil)
 }
 
 func listBalancesHandler(w http.ResponseWriter, r *http.Request, state *database.State) {
@@ -101,46 +139,12 @@ func txAddHandler(w http.ResponseWriter, r *http.Request, state *database.State)
 	writeRes(w, TxAddRes{hash})
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request, state *database.State) {
+func statusHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	res := StatusRes{
-		Hash:   state.LatestBlockHash(),
-		Number: state.LatestBlock().Header.Number,
+		Hash:       node.state.LatestBlockHash(),
+		Number:     node.state.LatestBlock().Header.Number,
+		KnownPeers: node.knownPeers,
 	}
 
 	writeRes(w, res)
-}
-
-func writeRes(w http.ResponseWriter, content interface{}) {
-	contentJSON, err := json.Marshal(content)
-	if err != nil {
-		writeErrRes(w, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(contentJSON)
-}
-
-func writeErrRes(w http.ResponseWriter, err error) {
-	jsonErrRes, _ := json.Marshal(ErrRes{err.Error()})
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write(jsonErrRes)
-}
-
-func readReq(r *http.Request, reqBody interface{}) error {
-	reqBodyJSON, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return fmt.Errorf("unable to read request body: %s", err.Error())
-	}
-	defer r.Body.Close()
-
-	err = json.Unmarshal(reqBodyJSON, reqBody)
-	if err != nil {
-		return fmt.Errorf("unable to unmarshal request body: %s", err.Error())
-	}
-
-	return nil
 }

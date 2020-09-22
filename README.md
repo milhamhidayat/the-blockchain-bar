@@ -49,9 +49,9 @@ Project from Lukas book Build Blockchain From Scratch In Go
 
 Setup:
 
-- Create `tbb/database` folder in `$HOME` folder
-- Copy `block.db` file from `./database/block.db` to `$HOME/tbb/database`
-- Run: `./tbb balances list --datadir=$HOME/tbb .tbb`
+- Create `.tbb/database` folder in `$HOME` folder
+- Copy `block.db` file from `./database/block.db` to `$HOME/.tbb/database`
+- Run: `./tbb balances list --datadir=$HOME/.tbb`
 
 ### 9 - It Takes Two Nodes To Tango
 
@@ -96,3 +96,7 @@ Setup:
 
 - Node needs to expose its current `state` so it can synchronize with the rest of the blockchain network.
 - So someone know who has new database content to synchronize from.
+
+#### Boostrap Nodes and Peer List
+
+- Running TBB nodes need to have at least 1 bootstrap nodes to discover other peers connected to the TBB blockchain network.
