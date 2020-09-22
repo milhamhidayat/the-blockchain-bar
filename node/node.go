@@ -87,7 +87,7 @@ func (n *Node) Run() error {
 	})
 
 	http.HandleFunc(endPointSync, func(w http.ResponseWriter, r *http.Request) {
-		statusHandler(w, r, n)
+		syncHandler(w, r, n.dataDir)
 	})
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", n.port), nil)

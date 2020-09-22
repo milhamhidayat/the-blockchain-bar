@@ -98,4 +98,13 @@ func syncHandler(w http.ResponseWriter, r *http.Request, dataDir string) {
 		return
 	}
 
+	blocks, err := database.GetBlocksAfter(hash, dataDir)
+	if err != nil {
+		writeErrRes(w, err)
+		return
+	}
+
+	writeRes(w, SyncRes{
+		Blocks: blocks,
+	})
 }

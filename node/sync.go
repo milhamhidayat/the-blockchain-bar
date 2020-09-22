@@ -13,7 +13,7 @@ func (n *Node) sync(ctx context.Context) error {
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Println("Searching for new Peers and Blocks...")
+			n.fetchNewBlocksAndPeers()
 		case <-ctx.Done():
 			ticker.Stop()
 		}

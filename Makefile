@@ -13,3 +13,7 @@ reset-db:
 .PHONY: api
 api:
 	./tbb run --datadir=$${HOME}/.tbb
+
+.PHONY: api-babayaga
+api-babayaga:
+	./tbb run --datadir=$${HOME}/.tbb-babayaga --port=8081
