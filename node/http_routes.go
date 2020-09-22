@@ -37,6 +37,11 @@ type StatusRes struct {
 	KnownPeers map[string]PeerNode `json:"peers_known"`
 }
 
+// SyncRes is a response for sync blockchain
+type SyncRes struct {
+	Blocks []database.Block `json:"blocks"`
+}
+
 func listBalancesHandler(w http.ResponseWriter, r *http.Request, state *database.State) {
 	writeRes(w, BalanceRes{
 		Hash:     state.LatestBlockHash(),
@@ -81,4 +86,16 @@ func statusHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	}
 
 	writeRes(w, res)
+}
+
+func syncHandler(w http.ResponseWriter, r *http.Request, dataDir string) {
+	reqHash := r.URL.Query().Get(endPointSyncQueryKeyFromBlock)
+
+	hash := database.Hash{}
+	err := hash.UnmarshalText([]byte(reqHash))
+	if err != nil {
+		writeErrRes(w, err)
+		return
+	}
+
 }

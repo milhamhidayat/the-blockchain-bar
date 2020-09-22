@@ -23,8 +23,6 @@ type State struct {
 
 // NewStateFromDisk update transaction data
 func NewStateFromDisk(dataDir string) (*State, error) {
-	dataDir = ExpandPath(dataDir)
-
 	err := initDataDirIfNotExists(dataDir)
 	if err != nil {
 		return nil, err

@@ -10,8 +10,10 @@ import (
 
 const (
 	// DefaultHTTPPort is default http port for api
-	DefaultHTTPPort = 8080
-	endPointStatus  = "/node/status"
+	DefaultHTTPPort               = 8080
+	endPointStatus                = "/node/status"
+	endPointSync                  = "/node/sync"
+	endPointSyncQueryKeyFromBlock = "fromBlock"
 )
 
 // PeerNode is node owned by other user
@@ -81,6 +83,10 @@ func (n *Node) Run() error {
 	})
 
 	http.HandleFunc(endPointStatus, func(w http.ResponseWriter, r *http.Request) {
+		statusHandler(w, r, n)
+	})
+
+	http.HandleFunc(endPointSync, func(w http.ResponseWriter, r *http.Request) {
 		statusHandler(w, r, n)
 	})
 
