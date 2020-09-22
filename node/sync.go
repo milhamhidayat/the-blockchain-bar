@@ -20,6 +20,32 @@ func (n *Node) sync(ctx context.Context) error {
 	}
 }
 
+func (n *Node) fetchNewBlocksAndPeers() {
+	for _, knownPeer := range n.knownPeers {
+		status, err := queryPeerStatus(knownPeer)
+		if err != nil {
+			fmt.Printf("error: %s\n", err)
+			continue
+		}
+
+		localBlockNumber := n.state.LatestBlock().Header.Number
+		if localBlockNumber < status.Number {
+			newBlocksCount := status.Number - localBlockNumber
+
+			fmt.Printf("Found %d new blocks from Peer %s\n", newBlocksCount, knownPeer.IP)
+		}
+
+		for _, maybeNewPeer := range status.KnownPeers {
+			_, isKnownPeer := n.knownPeers[maybeNewPeer.TCPAddress()]
+			if !isKnownPeer {
+				fmt.Printf("Found new Peer %s\n", knownPeer.TCPAddress())
+
+				n.knownPeers[maybeNewPeer.TCPAddress()] = maybeNewPeer
+			}
+		}
+	}
+}
+
 func queryPeerStatus(peer PeerNode) (StatusRes, error) {
 	url := fmt.Sprintf("http://%s/%s", peer.TCPAddress(), endPointStatus)
 	res, err := http.Get(url)

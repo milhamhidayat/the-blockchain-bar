@@ -20,7 +20,7 @@ func runCmd() *cobra.Command {
 
 			bootstrap := node.NewPeerNode(
 				"localhost",
-				8080,
+				8081,
 				true,
 				true)
 
