@@ -9,7 +9,7 @@ import (
 )
 
 func (n *Node) sync(ctx context.Context) error {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(45 * time.Second)
 
 	for {
 		select {
@@ -65,23 +65,34 @@ func (n *Node) doSync() {
 
 func (n *Node) syncBlocks(peer PeerNode, status StatusRes) error {
 	localBlockNumber := n.state.LatestBlock().Header.Number
-	if localBlockNumber < status.Number {
-		newBlocksCount := status.Number - localBlockNumber
 
-		fmt.Printf("Found %d new blocks from Peer %s\n", newBlocksCount, peer.TCPAddress())
-
-		blocks, err := fetchBlocksFromPeer(peer, n.state.LatestBlockHash())
-		if err != nil {
-			return err
-		}
-
-		err = n.state.AddBlocks(blocks)
-		if err != nil {
-			return err
-		}
+	//if the peer has no blocks, ignore it
+	if status.Hash.IsEmpty() {
+		return nil
 	}
 
-	return nil
+	// if the peer has less blocks than us, ignore it
+	if status.Number < localBlockNumber {
+		return nil
+	}
+
+	// if it's the genesis block and we already synced it, ignore it
+	if status.Number == 0 && !n.state.LatestBlockHash().IsEmpty() {
+		return nil
+	}
+
+	newBlocksCount := status.Number - localBlockNumber
+	if localBlockNumber == 0 && status.Number == 0 {
+		newBlocksCount = 1
+	}
+	fmt.Printf("found %d new blocks from peer %s\n", newBlocksCount, peer.TCPAddress())
+
+	blocks, err := fetchBlocksFromPeer(peer, n.state.LatestBlockHash())
+	if err != nil {
+		return err
+	}
+
+	return n.state.AddBlocks(blocks)
 }
 
 func (n *Node) syncKnownPeers(peer PeerNode, status StatusRes) error {

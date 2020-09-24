@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -28,6 +29,13 @@ func (h *Hash) UnmarshalText(data []byte) error {
 // TODO: replace h[:] to h
 func (h Hash) Hex() string {
 	return hex.EncodeToString(h[:])
+}
+
+// IsEmpty verify if a hash is empty
+func (h Hash) IsEmpty() bool {
+	emptyHash := Hash{}
+
+	return bytes.Equal(emptyHash[:], h[:])
 }
 
 // BlockHeader is block metadata

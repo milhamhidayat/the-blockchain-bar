@@ -18,6 +18,7 @@ type State struct {
 	dbFile          *os.File
 	latestBlock     Block
 	latestBlockHash Hash
+	hasGenesisBlock bool
 }
 
 // NewStateFromDisk update transaction data
@@ -50,6 +51,7 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 		f,
 		Block{},
 		Hash{},
+		false,
 	}
 
 	// Iterate over each the tx.db file's line by line
@@ -78,6 +80,7 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 
 		state.latestBlock = blockFs.Value
 		state.latestBlockHash = blockFs.Key
+		state.hasGenesisBlock = true
 	}
 	return state, nil
 }
@@ -138,8 +141,18 @@ func (s *State) AddBlock(b Block) (Hash, error) {
 	s.Balances = pendingState.Balances
 	s.latestBlockHash = blockHash
 	s.latestBlock = b
+	s.hasGenesisBlock = true
 
 	return blockHash, nil
+}
+
+// NextBlockNumber will return next block header number
+func (s *State) NextBlockNumber() uint64 {
+	if !s.hasGenesisBlock {
+		return uint64(0)
+	}
+
+	return s.LatestBlock().Header.Number + 1
 }
 
 // Close will close tx db file
@@ -149,6 +162,7 @@ func (s *State) Close() error {
 
 func (s *State) copy() State {
 	c := State{}
+	c.hasGenesisBlock = s.hasGenesisBlock
 	c.latestBlock = s.latestBlock
 	c.latestBlockHash = s.latestBlockHash
 	c.txMempool = make([]Tx, len(s.txMempool))
@@ -171,10 +185,10 @@ func applyBlock(b Block, s State) error {
 	nextExpectedBlockNumber := s.latestBlock.Header.Number + 1
 
 	if b.Header.Number != nextExpectedBlockNumber {
-		return fmt.Errorf("next expected block must '%d' not '%d'", nextExpectedBlockNumber, b.Header.Number)
+		return fmt.Errorf("next expected block must '%d' be '%d'", nextExpectedBlockNumber, b.Header.Number)
 	}
 
-	if s.latestBlock.Header.Number > 0 && !reflect.DeepEqual(b.Header.Parent, s.latestBlockHash) {
+	if s.hasGenesisBlock && s.latestBlock.Header.Number > 0 && !reflect.DeepEqual(b.Header.Parent, s.latestBlockHash) {
 		return fmt.Errorf("next block parent hash must be '%x' not '%x'", s.latestBlockHash, b.Header.Parent)
 	}
 
