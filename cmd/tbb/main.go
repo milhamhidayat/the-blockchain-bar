@@ -4,13 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"the-blockchain-bar/fs"
 
 	"github.com/spf13/cobra"
+
+	"the-blockchain-bar/fs"
 )
 
 const (
 	flagDataDir = "datadir"
+	flagIP      = "ip"
 	flagPort    = "port"
 )
 
@@ -25,7 +27,6 @@ func main() {
 
 	tbbCmd.AddCommand(versionCmd)
 	tbbCmd.AddCommand(balancesCmd())
-	tbbCmd.AddCommand(txCmd())
 	tbbCmd.AddCommand(runCmd())
 	tbbCmd.AddCommand(migrateCmd())
 

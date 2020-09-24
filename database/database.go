@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+	"reflect"
 )
 
 // GetBlocksAfter will get next block node
@@ -18,6 +19,11 @@ func GetBlocksAfter(blockHash Hash, dataDir string) ([]Block, error) {
 
 	blocks := make([]Block, 0)
 	shouldStartCollecting := false
+
+	if reflect.DeepEqual(blockHash, Hash{}) {
+		shouldStartCollecting = true
+	}
+
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		err := scanner.Err()

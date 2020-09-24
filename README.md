@@ -100,3 +100,10 @@ Setup:
 #### Boostrap Nodes and Peer List
 
 - Running TBB nodes need to have at least 1 bootstrap nodes to discover other peers connected to the TBB blockchain network.
+
+TODO
+- cmd/tbb/run.go
+- cmd/tbb/version.go
+- node/http_routes.go
+- node/node.go
+- node/sync.go

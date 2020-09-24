@@ -11,15 +11,23 @@ type Hash [32]byte
 
 // MarshalText will convert hash to byte
 // ref: https://golang.org/src/encoding/json/encode.go?s=6458:6501#L148
+// TODO: replace h[:] to h
 func (h Hash) MarshalText() ([]byte, error) {
-	return []byte(hex.EncodeToString(h[:])), nil
+	return []byte(h.Hex()), nil
 }
 
 // UnmarshalText will convert byte to hash
 // ref: https://golang.org/src/encoding/json/decode.go?s=4081:4129#L86
+// TODO: replace h[:] to h
 func (h *Hash) UnmarshalText(data []byte) error {
 	_, err := hex.Decode(h[:], data)
 	return err
+}
+
+// Hex encode hash to hex string
+// TODO: replace h[:] to h
+func (h Hash) Hex() string {
+	return hex.EncodeToString(h[:])
 }
 
 // BlockHeader is block metadata

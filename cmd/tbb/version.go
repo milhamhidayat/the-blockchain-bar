@@ -10,11 +10,11 @@ const (
 	// Major is app major versioning
 	Major = "0"
 	// Minor is app minor versioning
-	Minor = "6"
+	Minor = "7"
 	// Fix is app fix versioning
-	Fix = "1"
+	Fix = "0"
 	// Verbal is app information
-	Verbal = "HTTP API"
+	Verbal = "Sync"
 )
 
 var versionCmd = &cobra.Command{
