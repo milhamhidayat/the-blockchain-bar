@@ -185,7 +185,7 @@ func applyBlock(b Block, s State) error {
 	nextExpectedBlockNumber := s.latestBlock.Header.Number + 1
 
 	if b.Header.Number != nextExpectedBlockNumber {
-		return fmt.Errorf("next expected block must '%d' be '%d'", nextExpectedBlockNumber, b.Header.Number)
+		return fmt.Errorf("next expected block must be '%d' not '%d'", nextExpectedBlockNumber, b.Header.Number)
 	}
 
 	if s.hasGenesisBlock && s.latestBlock.Header.Number > 0 && !reflect.DeepEqual(b.Header.Parent, s.latestBlockHash) {

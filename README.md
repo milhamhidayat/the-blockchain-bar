@@ -101,9 +101,16 @@ Setup:
 
 - Running TBB nodes need to have at least 1 bootstrap nodes to discover other peers connected to the TBB blockchain network.
 
-TODO
-- cmd/tbb/run.go
-- cmd/tbb/version.go
-- node/http_routes.go
-- node/node.go
-- node/sync.go
+#### Summary
+
+- Each block has a number indicating the blockchain size (height)
+- Blockchain network consists of Nodes (Peers). Every full node is an independent computer storing the entier, real time blockchain database
+- All new nodes connect to a default bootstrap nodes to discover and retrieve the current database state as well as the full transaction history
+- Nodes continually and recursively communicate with each other using a sync algorithm and exchange information about each others new blocks and new network's peers
+
+### How To Simulate
+
+- Create folder `.andrej_sync`, `.babayaga_sync`, and `.caesar_sync`
+- Create `database` folder in those three folder, inside `database` folder create `block.db`
+- Copy `block.db` content from `.tbb/database/block.db` (andrej block db) to `block.db` in those sync folder
+- Run: make apiv2-andrej, make apiv2-babayaga, make apiv2-caesar
