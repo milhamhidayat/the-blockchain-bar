@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -32,7 +33,7 @@ func runCmd() *cobra.Command {
 				bootstrap,
 			)
 
-			err := n.Run()
+			err := n.Run(context.Background())
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

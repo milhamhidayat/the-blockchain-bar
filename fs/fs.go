@@ -45,3 +45,8 @@ func homeDir() string {
 
 	return usr.HomeDir
 }
+
+// RemoveDir remove directory
+func RemoveDir(path string) error {
+	return os.RemoveAll(path)
+}

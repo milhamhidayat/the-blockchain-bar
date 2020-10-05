@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 )
 
 // Hash is type for hashed db
@@ -42,6 +43,7 @@ func (h Hash) IsEmpty() bool {
 type BlockHeader struct {
 	Parent Hash   `json:"parent"` // parent block reference
 	Number uint64 `json:"number"`
+	Nonce  uint32 `json:"nonce"`
 	Time   uint64 `json:"time"`
 }
 
@@ -58,11 +60,12 @@ type Block struct {
 }
 
 // NewBlock will return new block
-func NewBlock(parent Hash, number uint64, time uint64, txs []Tx) Block {
+func NewBlock(parent Hash, number uint64, nonce uint32, time uint64, txs []Tx) Block {
 	return Block{
 		Header: BlockHeader{
 			Parent: parent,
 			Number: number,
+			Nonce:  nonce,
 			Time:   time,
 		},
 		TXs: txs,
@@ -77,4 +80,12 @@ func (b Block) Hash() (Hash, error) {
 	}
 
 	return sha256.Sum256(blockJSON), nil
+}
+
+// IsBlockHashValid check is block hash valid
+func IsBlockHashValid(hash Hash) bool {
+	return fmt.Sprintf("%x", hash[0]) == "0" &&
+		fmt.Sprintf("%x", hash[1]) == "0" &&
+		fmt.Sprintf("%x", hash[2]) == "0" &&
+		fmt.Sprintf("%x", hash[3]) != "0"
 }

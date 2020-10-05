@@ -114,3 +114,30 @@ Setup:
 - Create `database` folder in those three folder, inside `database` folder create `block.db`
 - Copy `block.db` content from `.tbb/database/block.db` (andrej block db) to `block.db` in those sync folder
 - Run: make apiv2-andrej, make apiv2-babayaga, make apiv2-caesar
+
+### 11 - The Autonomous Database Brain
+
+- Whe 2 nodes didn't have enough time to coordinate the changes in data, there will be an inconsistent blockchain state called **fork**.
+- When fork happens, the network splits -> because of network latency in distributed systems
+
+#### The P2P Heaven: The Fastest to Rule Them All
+
+- To prevent the fork, need to find a **consensus** (agreement)
+- Consensus is an algorithm to make sure
+    1. The p2p syncing rules
+    2. What transactions blocks are valid
+    3. What peers are trustworthy
+    4. Who can create the next block
+
+#### How does Bitcoin Mining Works?
+
+- Mining is the activity Proof of Work consensus performs.
+- For example, if there is an transaction and want to write + validate it in a ledger, miners will validate the transaction and get the token. This process is called mining
+- Miners are blockchain nodes.
+- Miners create PoW blocks by solving a computationl, cryptographic puzzle.
+
+##### Puzzle
+
+- Bitcoin puzzle generate block hash with X amount of leading zeroes, ex: 000000dfs5d4f58sd4f3fs4fda6
+- Fasters miner who finds a valid block hash starting with a pre-defined amount of zeroes -> mined the block + receives a block reward
+- The highers the amount of zeroes -> the higher the difficuly

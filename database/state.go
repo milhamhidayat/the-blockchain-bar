@@ -14,7 +14,6 @@ import (
 // and how many were transferred
 type State struct {
 	Balances        map[Account]uint
-	txMempool       []Tx
 	dbFile          *os.File
 	latestBlock     Block
 	latestBlockHash Hash
@@ -46,12 +45,11 @@ func NewStateFromDisk(dataDir string) (*State, error) {
 
 	scanner := bufio.NewScanner(f)
 	state := &State{
-		balances,
-		make([]Tx, 0),
-		f,
-		Block{},
-		Hash{},
-		false,
+		Balances:        balances,
+		dbFile:          f,
+		latestBlock:     Block{},
+		latestBlockHash: Hash{},
+		hasGenesisBlock: false,
 	}
 
 	// Iterate over each the tx.db file's line by line
@@ -130,7 +128,7 @@ func (s *State) AddBlock(b Block) (Hash, error) {
 		return Hash{}, err
 	}
 
-	fmt.Println("Persisting new Block to disk")
+	fmt.Println("\nPersisting new Block to disk")
 	fmt.Printf("\t%s\n", blockFsJSON)
 
 	_, err = s.dbFile.Write(append(blockFsJSON, '\n'))
@@ -165,15 +163,10 @@ func (s *State) copy() State {
 	c.hasGenesisBlock = s.hasGenesisBlock
 	c.latestBlock = s.latestBlock
 	c.latestBlockHash = s.latestBlockHash
-	c.txMempool = make([]Tx, len(s.txMempool))
 	c.Balances = make(map[Account]uint)
 
 	for acc, balance := range s.Balances {
 		c.Balances[acc] = balance
-	}
-
-	for _, tx := range s.txMempool {
-		c.txMempool = append(c.txMempool, tx)
 	}
 
 	return c
@@ -190,6 +183,15 @@ func applyBlock(b Block, s State) error {
 
 	if s.hasGenesisBlock && s.latestBlock.Header.Number > 0 && !reflect.DeepEqual(b.Header.Parent, s.latestBlockHash) {
 		return fmt.Errorf("next block parent hash must be '%x' not '%x'", s.latestBlockHash, b.Header.Parent)
+	}
+
+	hash, err := b.Hash()
+	if err != nil {
+		return err
+	}
+
+	if !IsBlockHashValid(hash) {
+		return fmt.Errorf("invalid block hash %x", hash)
 	}
 
 	return applyTXs(b.TXs, &s)

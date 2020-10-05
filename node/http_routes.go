@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"the-blockchain-bar/database"
 )
@@ -30,7 +29,7 @@ type TxAddReq struct {
 
 // TxAddRes is a response for adding new transaction
 type TxAddRes struct {
-	Hash database.Hash `json:"block_hash"`
+	Success bool `json:"success"`
 }
 
 // StatusRes is a response for node status
@@ -38,6 +37,7 @@ type StatusRes struct {
 	Hash       database.Hash       `json:"block_hash"`
 	Number     uint64              `json:"block_number"`
 	KnownPeers map[string]PeerNode `json:"peers_known"`
+	PendingTXs []database.Tx       `json:"pending_txs"`
 }
 
 // SyncRes is a response for sync blockchain
@@ -58,7 +58,7 @@ func listBalancesHandler(w http.ResponseWriter, r *http.Request, state *database
 	})
 }
 
-func txAddHandler(w http.ResponseWriter, r *http.Request, state *database.State) {
+func txAddHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	req := TxAddReq{}
 	err := readReq(r, &req)
 	if err != nil {
@@ -73,20 +73,15 @@ func txAddHandler(w http.ResponseWriter, r *http.Request, state *database.State)
 		req.Data,
 	)
 
-	block := database.NewBlock(
-		state.LatestBlockHash(),
-		state.NextBlockNumber(),
-		uint64(time.Now().Unix()),
-		[]database.Tx{tx},
-	)
-
-	hash, err := state.AddBlock(block)
+	err = node.AddPendingTX(tx, node.info)
 	if err != nil {
 		writeErrRes(w, err)
 		return
 	}
 
-	writeRes(w, TxAddRes{hash})
+	writeRes(w, TxAddRes{
+		Success: true,
+	})
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request, node *Node) {
@@ -94,6 +89,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 		Hash:       node.state.LatestBlockHash(),
 		Number:     node.state.LatestBlock().Header.Number,
 		KnownPeers: node.knownPeers,
+		PendingTXs: node.getPendingTXsAsArray(),
 	}
 
 	writeRes(w, res)
