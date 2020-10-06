@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	// DefaultMiner is default miner value
+	DefaultMiner = ""
 	// DefaultIP is default ip for api
 	DefaultIP = "127.0.0.1"
 	// DefaultHTTPPort is default http port for api
@@ -20,9 +22,10 @@ const (
 	endPointSync                  = "/node/sync"
 	endPointSyncQueryKeyFromBlock = "fromBlock"
 
-	endPointAddPeer             = "/node/peer"
-	endPointAddPeerQueryKeyIP   = "ip"
-	endpointAddPeerQueryKeyPort = "port"
+	endPointAddPeer              = "/node/peer"
+	endPointAddPeerQueryKeyIP    = "ip"
+	endpointAddPeerQueryKeyPort  = "port"
+	endpointAddPeerQueryKeyMiner = "miner"
 
 	miningIntervalSeconds = 10
 )
@@ -30,11 +33,11 @@ const (
 // PeerNode is node owned by other user
 // connected to blockchain that can be peered
 type PeerNode struct {
-	IP          string `json:"ip"`
-	Port        uint64 `json:"port"`
-	IsBootstrap bool   `json:"is_bootstrap"`
-	IsActive    bool   `json:"is_active"`
-	// Check wheterh node already connected, sync with this Peer
+	IP          string           `json:"ip"`
+	Port        uint64           `json:"port"`
+	IsBootstrap bool             `json:"is_bootstrap"`
+	Account     database.Account `json:"account"`
+	// Check whet node already connected, sync with this Peer
 	connected bool
 }
 
@@ -57,7 +60,7 @@ type Node struct {
 }
 
 // New will return new node
-func New(dataDir string, ip string, port uint64, bootstrap PeerNode) *Node {
+func New(dataDir string, ip string, port uint64, acc database.Account, bootstrap PeerNode) *Node {
 	knownPeers := make(map[string]PeerNode)
 	knownPeers[bootstrap.TCPAddress()] = bootstrap
 	return &Node{
@@ -66,6 +69,7 @@ func New(dataDir string, ip string, port uint64, bootstrap PeerNode) *Node {
 			ip,
 			port,
 			false,
+			acc,
 			true,
 		),
 		knownPeers:      knownPeers,
@@ -78,11 +82,12 @@ func New(dataDir string, ip string, port uint64, bootstrap PeerNode) *Node {
 }
 
 // NewPeerNode will return new peer node
-func NewPeerNode(ip string, port uint64, isBootstrap bool, connected bool) PeerNode {
+func NewPeerNode(ip string, port uint64, isBootstrap bool, acc database.Account, connected bool) PeerNode {
 	return PeerNode{
 		IP:          ip,
 		Port:        port,
 		IsBootstrap: isBootstrap,
+		Account:     acc,
 		connected:   connected,
 	}
 }
@@ -197,6 +202,7 @@ func (n *Node) minePendingTXs(ctx context.Context) error {
 	blockToMine := NewPendingBlock(
 		n.state.LatestBlockHash(),
 		n.state.LatestBlock().Header.Number+1,
+		n.info.Account,
 		n.getPendingTXsAsArray(),
 	)
 

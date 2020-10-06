@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"time"
+
 	"the-blockchain-bar/database"
 	"the-blockchain-bar/fs"
-	"time"
 )
 
 // PendingBlock is a block where waiting to be validate
@@ -15,6 +16,7 @@ type PendingBlock struct {
 	parent database.Hash
 	number uint64
 	time   uint64
+	miner  database.Account
 	txs    []database.Tx
 }
 
@@ -22,11 +24,13 @@ type PendingBlock struct {
 func NewPendingBlock(
 	parent database.Hash,
 	number uint64,
+	miner database.Account,
 	txs []database.Tx) PendingBlock {
 	return PendingBlock{
 		parent: parent,
 		number: number,
 		time:   uint64(time.Now().Unix()),
+		miner:  miner,
 		txs:    txs,
 	}
 }
@@ -65,6 +69,7 @@ func Mine(ctx context.Context, pb PendingBlock) (database.Block, error) {
 			pb.number,
 			nonce,
 			pb.time,
+			pb.miner,
 			pb.txs,
 		)
 
@@ -77,10 +82,11 @@ func Mine(ctx context.Context, pb PendingBlock) (database.Block, error) {
 	}
 
 	fmt.Printf("Mined new block '%x' using PoW 🥳 %s:\n", hash, fs.Unicode("\\UIF389"))
-	fmt.Printf("Height: '%v'\n", pb.number)
-	fmt.Printf("Nonce: '%v'", nonce)
-	fmt.Printf("Created: '%v'\n", pb.time)
-	fmt.Printf("Parent: '%v'\n\n", pb.parent.Hex())
+	fmt.Printf("Height: '%v'\n", block.Header.Number)
+	fmt.Printf("Nonce: '%v'", block.Header.Nonce)
+	fmt.Printf("Created: '%v'\n", block.Header.Time)
+	fmt.Printf("Miner: '%v'\n", block.Header.Miner)
+	fmt.Printf("Parent: '%v'\n\n", block.Header.Parent.Hex())
 	fmt.Printf("Attempt: '%v'\n", attempt)
 	fmt.Printf("Time: %s\n\n", time.Since(start))
 

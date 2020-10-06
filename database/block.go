@@ -8,6 +8,9 @@ import (
 	"fmt"
 )
 
+//BlockReward is reward for miner
+const BlockReward = 100
+
 // Hash is type for hashed db
 type Hash [32]byte
 
@@ -41,10 +44,11 @@ func (h Hash) IsEmpty() bool {
 
 // BlockHeader is block metadata
 type BlockHeader struct {
-	Parent Hash   `json:"parent"` // parent block reference
-	Number uint64 `json:"number"`
-	Nonce  uint32 `json:"nonce"`
-	Time   uint64 `json:"time"`
+	Parent Hash    `json:"parent"` // parent block reference
+	Number uint64  `json:"number"`
+	Nonce  uint32  `json:"nonce"`
+	Time   uint64  `json:"time"`
+	Miner  Account `json:"miner"`
 }
 
 // BlockFS store unique hash from a block
@@ -60,12 +64,13 @@ type Block struct {
 }
 
 // NewBlock will return new block
-func NewBlock(parent Hash, number uint64, nonce uint32, time uint64, txs []Tx) Block {
+func NewBlock(parent Hash, number uint64, nonce uint32, time uint64, miner Account, txs []Tx) Block {
 	return Block{
 		Header: BlockHeader{
 			Parent: parent,
 			Number: number,
 			Nonce:  nonce,
+			Miner:  miner,
 			Time:   time,
 		},
 		TXs: txs,

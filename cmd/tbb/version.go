@@ -10,11 +10,11 @@ const (
 	// Major is app major versioning
 	Major = "0"
 	// Minor is app minor versioning
-	Minor = "8"
+	Minor = "9"
 	// Fix is app fix versioning
 	Fix = "0"
 	// Verbal is app information
-	Verbal = "PoW"
+	Verbal = "PoW Reward"
 )
 
 var versionCmd = &cobra.Command{

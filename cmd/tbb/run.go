@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"the-blockchain-bar/database"
 	"the-blockchain-bar/node"
 )
 
@@ -15,6 +16,7 @@ func runCmd() *cobra.Command {
 		Use:   "run",
 		Short: "Launches the TBB node and its HTTP API",
 		Run: func(cmd *cobra.Command, args []string) {
+			miner, _ := cmd.Flags().GetString(flagMiner)
 			ip, _ := cmd.Flags().GetString(flagIP)
 			port, _ := cmd.Flags().GetUint64(flagPort)
 			fmt.Println("Launching TBB Node and its HTTP API...")
@@ -23,6 +25,7 @@ func runCmd() *cobra.Command {
 				"127.0.0.1",
 				8080,
 				true,
+				database.NewAccount("andrej"),
 				false,
 			)
 
@@ -30,6 +33,7 @@ func runCmd() *cobra.Command {
 				getDataDirFromCmd(cmd),
 				ip,
 				port,
+				database.NewAccount(miner),
 				bootstrap,
 			)
 
@@ -42,6 +46,10 @@ func runCmd() *cobra.Command {
 	}
 
 	addDefaultRequiredFlags(runCmd)
+	runCmd.Flags().String(
+		flagMiner,
+		node.DefaultMiner,
+		"miner account of this node to receive block rewards")
 	runCmd.Flags().String(
 		flagIP,
 		"",
