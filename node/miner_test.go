@@ -55,7 +55,8 @@ func TestMine(t *testing.T) {
 func TestMineWithTimeout(t *testing.T) {
 	pendingBlock := createRandomPendingBlock()
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Microsecond*100)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*100)
+	defer cancel()
 	_, err := Mine(ctx, pendingBlock)
 	if err == nil {
 		t.Fatal(err)

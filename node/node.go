@@ -24,7 +24,7 @@ const (
 	endPointAddPeerQueryKeyIP   = "ip"
 	endpointAddPeerQueryKeyPort = "port"
 
-	miningIntervalSecons = 10
+	miningIntervalSeconds = 10
 )
 
 // PeerNode is node owned by other user
@@ -163,7 +163,7 @@ func (n *Node) mine(ctx context.Context) error {
 		stopCurrentMining context.CancelFunc
 	)
 
-	ticker := time.NewTicker(time.Second * miningIntervalSecons)
+	ticker := time.NewTicker(time.Second * miningIntervalSeconds)
 	for {
 		select {
 		case <-ticker.C:
