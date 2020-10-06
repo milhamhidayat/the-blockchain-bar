@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 )
 
 // State represent business logic for db component
@@ -205,6 +206,10 @@ func applyBlock(b Block, s *State) error {
 
 // applyTXs will validate list of transaction
 func applyTXs(txs []Tx, s *State) error {
+	sort.Slice(txs, func(i, j int) bool {
+		return txs[i].Time < txs[j].Time
+	})
+
 	for _, tx := range txs {
 		err := applyTx(tx, s)
 		if err != nil {

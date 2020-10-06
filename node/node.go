@@ -139,7 +139,16 @@ func (n *Node) Run(ctx context.Context) error {
 		_ = server.Close()
 	}()
 
-	return server.ListenAndServe()
+	err = server.ListenAndServe()
+	if err != http.ErrServerClosed {
+		return err
+	}
+	return nil
+}
+
+// LatestBlockHash from database
+func (n *Node) LatestBlockHash() database.Hash {
+	return n.state.LatestBlockHash()
 }
 
 // AddPeer will add new peer to known peers
@@ -261,9 +270,12 @@ func (n *Node) AddPendingTX(tx database.Tx, fromPeer PeerNode) error {
 }
 
 func (n *Node) getPendingTXsAsArray() []database.Tx {
-	txs := make([]database.Tx, 0)
+	txs := make([]database.Tx, len(n.pendingTXs))
+
+	i := 0
 	for _, tx := range n.pendingTXs {
-		txs = append(txs, tx)
+		txs[i] = tx
+		i++
 	}
 
 	return txs
